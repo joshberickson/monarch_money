@@ -15,7 +15,6 @@ join dbt_dev.dbt_jerickson.created c
     and s.data_provider = c.data_provider
     and to_timestamp(s.timestamp, 'M/d/yy H:mm') < to_timestamp(c.timestamp, 'M/d/yy H:mm')
 where 1=1
-group by 1, 2, 3, 4, 5, 6, 7, 8
 ),
 -- Find the connection attempt event closest to the created event
 -- In the event that a user attempts to connect an institution on web, abandons the flow, then tries again mobile,
@@ -55,7 +54,6 @@ select
 from dedupe_accts c
 left join disconnections d
     on c.credential_id = d.credential_id
-order by 1, 2 desc
 ),
 metrics as (
 select
@@ -65,7 +63,7 @@ select
     sum(successful_connection) as successful_connections,
     1.0 * successful_connections / connections as first_connection_success
 from data
-group by 1, 2
+group by 1,2
 ),
 fcs as (
 select
@@ -82,7 +80,7 @@ select
     pct_fcs,
     ntile(4) over(order by pct_fcs) as quartile
 from fcs
-group by 1, 2
+group by 1,2
 )
 select
     quartile,
