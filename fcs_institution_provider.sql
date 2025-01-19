@@ -15,7 +15,6 @@ join dbt_dev.dbt_jerickson.created c
     and s.data_provider = c.data_provider
     and to_timestamp(s.timestamp, 'M/d/yy H:mm') < to_timestamp(c.timestamp, 'M/d/yy H:mm')
 where 1=1
-group by 1,2,3,4,5,6,7,8
 ),
 dedupe_accts as (
 select
@@ -49,7 +48,7 @@ select
 from dedupe_accts c
 left join disconnections d
     on c.credential_id = d.credential_id
-order by 1, 2 desc
+order by 1,2 desc
 )
 select
     count(distinct user_id) as users,
