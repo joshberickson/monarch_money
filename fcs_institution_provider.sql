@@ -48,7 +48,6 @@ select
 from dedupe_accts c
 left join disconnections d
     on c.credential_id = d.credential_id
-order by 1,2 desc
 )
 select
     count(distinct user_id) as users,
