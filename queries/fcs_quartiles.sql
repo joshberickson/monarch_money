@@ -14,7 +14,6 @@ join dbt_dev.dbt_jerickson.created c
     and s.institution_name = c.institution_name
     and s.data_provider = c.data_provider
     and to_timestamp(s.timestamp, 'M/d/yy H:mm') < to_timestamp(c.timestamp, 'M/d/yy H:mm')
-where 1=1
 ),
 -- Find the connection attempt event closest to the created event
 -- In the event that a user attempts to connect an institution on web, abandons the flow, then tries again mobile,
@@ -47,10 +46,7 @@ select
     c.credential_id,
     d.disconnected_at,
     timestampdiff(hour, c.created_at, d.disconnected_at) as hrs_diff,
-    case 
-        when d.disconnected_at is null or timestampdiff(hour, c.created_at, d.disconnected_at) > 24 then 1 
-        else 0 
-    end as successful_connection
+    case when d.disconnected_at is null or timestampdiff(hour, c.created_at, d.disconnected_at) > 24 then 1 else 0 end as successful_connection
 from dedupe_accts c
 left join disconnections d
     on c.credential_id = d.credential_id
