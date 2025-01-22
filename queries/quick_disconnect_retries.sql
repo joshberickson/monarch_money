@@ -14,7 +14,6 @@ join dbt_dev.dbt_jerickson.created c
     and s.institution_name = c.institution_name
     and s.data_provider = c.data_provider
     and to_timestamp(s.timestamp, 'M/d/yy H:mm') < to_timestamp(c.timestamp, 'M/d/yy H:mm')
-where 1=1
 ),
 dedupe_accts as (
 select
@@ -44,10 +43,7 @@ select
     c.credential_id,
     d.disconnected_at,
     timestampdiff(hour, c.created_at, d.disconnected_at) as hrs_diff,
-    case 
-        when d.disconnected_at is null or timestampdiff(hour, c.created_at, d.disconnected_at) > 24 then 1 
-        else 0 
-    end as successful_connection
+    case when d.disconnected_at is null or timestampdiff(hour, c.created_at, d.disconnected_at) > 24 then 1 else 0 end as successful_connection
 from dedupe_accts c
 left join disconnections d
     on c.credential_id = d.credential_id
@@ -86,6 +82,13 @@ select
     r.disconnected_at,
     r.retry_at,
     r.retry_after_qd,
+    datediff(r.retry_at,r.disconnected_at) as days_btwn_qd_retry,
+    case when datediff(hour,r.disconnected_at,r.retry_at) = 0 then 'a) 0'
+        when datediff(hour,r.disconnected_at,r.retry_at) = 1 then 'b) 1'
+        when datediff(hour,r.disconnected_at,r.retry_at) between 2 and 12 then 'c) 2-12'
+        when datediff(hour,r.disconnected_at,r.retry_at) between 13 and 24 then 'd) 13-24'
+        when datediff(hour,r.disconnected_at,r.retry_at) > 24 then 'e) >24'
+        else null end as hrs_btwn_qd_retry,
     max(case when c.user_id is not null then 1 else 0 end) as connection_after_retry
 from retry_users r
 left join dbt_dev.dbt_jerickson.created c
