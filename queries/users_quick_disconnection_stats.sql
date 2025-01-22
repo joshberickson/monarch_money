@@ -16,6 +16,9 @@ join dbt_dev.dbt_jerickson.created c
     and to_timestamp(s.timestamp, 'M/d/yy H:mm') < to_timestamp(c.timestamp, 'M/d/yy H:mm')
 where 1=1
 ),
+--find the connection attempt event closest to the created event
+--in the event that a user attempts to connect an institution on web, abandons the flow, then tries again mobile
+--we want to attribute the creation to the latest (mobile) event
 dedupe_accts as (
 select
     *,
